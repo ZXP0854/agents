@@ -204,18 +204,48 @@ html, body {
 
   /* ========== Agent 身份 ========== */
   var AGENT_NAME = '小林';
-  var MY_CATEGORY = "包装胶带";
-  var MY_NORMAL_PRODUCT = "得力透明封箱胶带";
-  var MY_ECO_PRODUCT = "可降解封箱胶带";
+  var MY_CATEGORY = "牙刷";
+  var MY_MEASURE = "牙刷";
+  var MY_NORMAL_PRODUCT = "普通软毛牙刷";
+  var MY_ECO_PRODUCT = "竹制环保牙刷";
   var MY_GROUP = "non_collaboration";
-  var MY_NORMAL_ALIASES = ["透明胶带大卷", "得力透明封箱胶带", "透明胶带", "胶带大卷", "大卷胶带", "封箱胶带", "胶带"];
-  var MY_ECO_ALIASES = ["可降解封箱胶带", "可降解胶带"];
-  var NORMAL_RESPONSE = "【包装胶带】\n\nA（普通款）得力透明封箱胶带\n透明淡黄色塑料大卷胶带，卷芯印有deli得力标识，胶带透光，适合快递打包封口\n价格：7.11元\n\nB（环保可降解款）可降解封箱胶带\n浅棕米黄色，多卷捆绑；主打可降解材质，表面光滑，支持手撕\n价格：11.00元\n\n请选择绿色消费！\n可降解胶带采用环保可降解材质，材料可自然分解，不产生长期塑料污染，有效减轻环境负担。已有65%的消费者选择了可降解胶带。请您选择可降解胶带，以每一次选择传递环保力量，让绿色生活成为个人习惯。";
+  var MY_NORMAL_ALIASES = ["软毛牙刷", "普通软毛牙刷", "牙刷", "毛刷"];
+  var MY_ECO_ALIASES = ["竹制环保牙刷", "竹牙刷", "竹制牙刷"];
+  var NORMAL_RESPONSE = "本店有两种牙刷售卖：\n\nA（普通款）普通软毛牙刷\n透明塑料手柄，有黑、棕、透粉三色；小刷头，黑色炭丝软毛，家用成人款\n价格：12.90元\n\nB（环保可降解款）竹制环保牙刷\n天然竹木手柄，手柄印有品牌字样；搭配不同颜色竹炭软毛刷头，牛皮纸盒独立包装，共8支，风格天然质朴\n价格：14.21元\n\n请选择绿色消费！\n竹牙刷选用可降解竹制环保材质制成，材料可自然分解，不产生长期塑料污染，有效减轻环境负担。已有65%的消费者选择了竹牙刷。请您选择竹牙刷，以每一次选择传递环保力量，让绿色成为生活个人习惯。";
+
+  /* ========== A/B 知识库 ========== */
+  var KB_A = {"优点": "透明塑料手柄，三色可选；小刷头、炭丝软毛，清洁细腻；家用成人款，价格实惠。", "好处": "刷毛柔软，呵护牙龈；价格便宜，定期更换不心疼。", "缺点": "塑料手柄难以降解，废弃后对环境造成负担。", "用途": "日常早晚刷牙清洁。", "价格": "12.90元/支。", "安全": "食品级刷毛，符合口腔用品安全标准。", "耐用": "建议每3个月更换，正常使用期内刷毛不易变形。"};
+  var KB_B = {"优点": "刷柄采用天然竹子，天然抗菌；竹炭软毛刷头，清洁护龈；牛皮纸盒独立包装。", "好处": "竹材生长快、可再生；废弃后刷柄可自然降解，减少塑料污染；天然材质更健康环保。", "缺点": "长期潮湿环境可能出现霉斑，需保持干燥；造型颜色选择较少；刷毛仍多为尼龙，需拆下分别处理。", "用途": "日常刷牙清洁、旅行携带、儿童环保教育、环保礼品。", "价格": "14.21元/支，比普通款略贵。", "安全": "竹材经消毒处理，不含有害物质；刷毛符合口腔用品安全标准。", "耐用": "保持干燥可正常使用3个月左右；避免长期浸泡。"};
+  var KB_COMPARE = "普通软毛牙刷更便宜、颜色多；竹制环保牙刷更环保、天然抗菌。两者清洁效果接近，差别在材质与环保属性上。";
+  var KB_RECOMMEND = "如果您更看重环保，推荐选择B（竹制环保牙刷）；如果更看重价格与颜色，可以选择A（普通软毛牙刷）。";
 
   /* ========== 固定话术（实验要求，不可改动） ========== */
   var WELCOME_MSG = '顾客您好！欢迎光临小林超市，我是本店的 AI 智能助手小林，请输入您的商品信息。';
-  var ERROR_MSG = '抱歉，暂不支持该商品，请输入本超市商品：A4 白纸、金属中性笔、透明胶带大卷、垃圾袋、软毛牙刷、一次性纸杯。';
+  var ERROR_MSG = '抱歉，暂不支持该商品，请输入与' + MY_MEASURE + '有关的商品。';
   var ECO_PROMPT_MSG = '本次请输入普通版本商品，请重新输入对应普通商品名称。';
+
+  /* ========== 组别结尾语（协作/非协作关键词区分） ========== */
+  var GROUP_CLOSING = (MY_GROUP === 'collaboration')
+    ? '加入我们，让我们一起选择' + MY_ECO_PRODUCT + '，为环保做出贡献！'
+    : '请您选择' + MY_ECO_PRODUCT + '，为环保做出贡献！';
+
+  /* ========== 追问类型（12 个 agent 风格统一） ========== */
+  var QUESTION_TYPES = [
+    { type: '推荐', target: false, keys: ['推荐', '建议', '买哪个', '选哪个', '应该买', '值得买', '买什么', '怎么选', '买哪款', '选哪款'] },
+    { type: '对比', target: false, keys: ['对比', '区别', '比较', '相比', 'vs', '哪个好', '有什么不同', '差别', '不一样', '哪个更好', '不同'] },
+    { type: '优点', target: true,  keys: ['优点', '优势', '特色', '亮点', '哪里好', '好在', '好不好', '怎么样'] },
+    { type: '好处', target: true,  keys: ['好处', '有什么用', '有什么好', '作用', '帮助'] },
+    { type: '缺点', target: true,  keys: ['缺点', '不足', '劣势', '缺陷', '坏处', '不好', '问题'] },
+    { type: '用途', target: true,  keys: ['用途', '怎么用', '使用场景', '能做什么', '适用', '适合', '场景', '干什么用', '干嘛用'] },
+    { type: '价格', target: true,  keys: ['价格', '多少钱', '贵', '便宜', '成本', '花费', '划算', '价位'] },
+    { type: '安全', target: true,  keys: ['安全', '有毒', '无害', '健康', '放心', '标准', '检测', '危害'] },
+    { type: '耐用', target: true,  keys: ['耐用', '质量', '寿命', '持久', '容易坏', '结实', '保存', '保质', '储存', '好用吗', '能用多久'] }
+  ];
+
+  var LABEL_MAP = { '优点': '优点', '好处': '好处', '缺点': '缺点', '用途': '用途', '价格': '价格', '安全': '安全性', '耐用': '耐用性' };
+
+  var A_TARGET_MARKERS = MY_NORMAL_ALIASES.concat(['普通款', '普通', 'a款', '选a', '买a', 'a的', 'a有', 'a好', 'a是', 'a什么']);
+  var B_TARGET_MARKERS = MY_ECO_ALIASES.concat(['环保款', '可降解款', '绿色款', '环保', '可降解', 'b款', '选b', '买b', 'b的', 'b有', 'b好', 'b是', 'b什么']);
 
   /* ========== 全局状态 ========== */
   var sessionId = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
@@ -290,6 +320,54 @@ html, body {
     return false;
   }
 
+  /* ========== 追问检测 ========== */
+  function detectQuestion(input) {
+    var lower = input.trim().toLowerCase();
+    for (var i = 0; i < QUESTION_TYPES.length; i++) {
+      var qt = QUESTION_TYPES[i];
+      for (var j = 0; j < qt.keys.length; j++) {
+        if (lower.indexOf(qt.keys[j].toLowerCase()) !== -1) return qt;
+      }
+    }
+    // 环保概念追问兜底（如「可降解是什么」「B环保吗」），但输入本身是商品名时不触发
+    if (matchAny(MY_ECO_ALIASES, input) || matchAny(MY_NORMAL_ALIASES, input)) return null;
+    var ecoConceptKeys = ['环保', '可降解', '降解', '绿色', '可持续'];
+    for (var k = 0; k < ecoConceptKeys.length; k++) {
+      if (lower.indexOf(ecoConceptKeys[k].toLowerCase()) !== -1) return { type: 'eco' };
+    }
+    return null;
+  }
+
+  function detectTarget(input) {
+    if (matchAny(B_TARGET_MARKERS, input)) return 'B';
+    if (matchAny(A_TARGET_MARKERS, input)) return 'A';
+    return 'both';
+  }
+
+  function answerQuestion(qt, input) {
+    if (qt.type === '对比') {
+      return KB_COMPARE + '\n' + GROUP_CLOSING;
+    }
+    if (qt.type === '推荐') {
+      return KB_RECOMMEND + '\n' + GROUP_CLOSING;
+    }
+    if (qt.type === 'eco') {
+      return 'B（' + MY_ECO_PRODUCT + '）的好处：' + KB_B['好处'] + '\n' + GROUP_CLOSING;
+    }
+
+    var label = LABEL_MAP[qt.type];
+    var target = detectTarget(input);
+    if (target === 'A') {
+      return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type] + '\n' + GROUP_CLOSING;
+    }
+    if (target === 'B') {
+      return 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type] + '\n' + GROUP_CLOSING;
+    }
+    return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type]
+      + '\nB（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type]
+      + '\n' + GROUP_CLOSING;
+  }
+
   /* ========== 数据回调 ========== */
   function reportToCredamo(eventType, data) {
     try {
@@ -331,17 +409,23 @@ html, body {
     var reply;
     var replyType;
 
-    // 1) 被试直接输入环保款商品 -> 提示改输普通版本
-    if (matchAny(MY_ECO_ALIASES, text)) {
+    // 1) 追问（优点/好处/缺点/用途/价格/安全/耐用/对比/推荐/环保概念）
+    var qt = detectQuestion(text);
+    if (qt) {
+      reply = answerQuestion(qt, text);
+      replyType = 'qa_response';
+    }
+    // 2) 被试直接输入环保款商品 -> 提示改输普通版本
+    else if (matchAny(MY_ECO_ALIASES, text)) {
       reply = ECO_PROMPT_MSG;
       replyType = 'eco_product_prompt';
     }
-    // 2) 输入本品类普通商品 -> 输出商品信息（普通款+环保款）+ 干预文案
+    // 3) 输入本品类普通商品 -> 商品信息 + 干预文案
     else if (matchAny(MY_NORMAL_ALIASES, text)) {
       reply = NORMAL_RESPONSE;
       replyType = 'product_response';
     }
-    // 3) 其余输入 -> 固定报错
+    // 4) 其余输入 -> 按品类固定报错
     else {
       reply = ERROR_MSG;
       replyType = 'error_response';

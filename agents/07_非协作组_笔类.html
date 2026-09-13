@@ -205,17 +205,47 @@ html, body {
   /* ========== Agent 身份 ========== */
   var AGENT_NAME = '小林';
   var MY_CATEGORY = "笔类";
+  var MY_MEASURE = "笔";
   var MY_NORMAL_PRODUCT = "金属中性笔";
   var MY_ECO_PRODUCT = "咖啡渣环保中性笔";
   var MY_GROUP = "non_collaboration";
-  var MY_NORMAL_ALIASES = ["金属中性笔", "中性笔", "金属笔", "签字笔"];
+  var MY_NORMAL_ALIASES = ["金属中性笔", "中性笔", "金属笔", "签字笔", "笔"];
   var MY_ECO_ALIASES = ["咖啡渣环保中性笔", "咖啡渣外壳笔", "咖啡渣笔", "咖啡渣"];
-  var NORMAL_RESPONSE = "【笔类】\n\nA（普通款）金属中性笔\n不锈钢金属笔杆，盖帽式商务签字笔；有黑色、银色两种笔身，笔尾和笔夹位置带银色金属装饰，笔身简约修长\n价格：5.68元\n\nB（环保可降解款）咖啡渣环保中性笔\n笔身由咖啡渣可降解材料制成，有白色、浅绿、深黑三色；搭配牛皮纸开窗简易礼盒包装，风格质朴简约，适合商务礼品\n价格：10.00元\n\n请选择绿色消费！\n咖啡渣外壳笔采用可降解外壳与无毒墨水，书写流畅顺滑，适配日常学习、办公等多种场景，既满足使用需求，又共同减轻传统塑料笔带来的环境负担。已有65%的消费者选择了咖啡渣外壳笔。请您选择咖啡渣外壳笔，以每一次选择传递环保力量，让绿色办公成为个人习惯。";
+  var NORMAL_RESPONSE = "本店有两种笔售卖：\n\nA（普通款）金属中性笔\n不锈钢金属笔杆，盖帽式商务签字笔；有黑色、银色两种笔身，笔尾和笔夹位置带银色金属装饰，笔身简约修长\n价格：5.68元\n\nB（环保可降解款）咖啡渣环保中性笔\n笔身由咖啡渣可降解材料制成，有白色、浅绿、深黑三色；搭配牛皮纸开窗简易礼盒包装，风格质朴简约，适合商务礼品\n价格：10.00元\n\n请选择绿色消费！\n咖啡渣外壳笔采用可降解外壳与无毒墨水，书写流畅顺滑，适配日常学习、办公等多种场景，既满足使用需求，又共同减轻传统塑料笔带来的环境负担。已有65%的消费者选择了咖啡渣外壳笔。请您选择咖啡渣外壳笔，以每一次选择传递环保力量，让绿色办公成为个人习惯。";
+
+  /* ========== A/B 知识库 ========== */
+  var KB_A = {"优点": "不锈钢金属笔杆，坚固耐用；商务外观简洁大方，笔身修长、手感沉稳；书写顺滑，适合日常办公与签字。", "好处": "价格实惠，一支即可长期使用；金属材质结实不易坏，性价比高；随处可买到，替换方便。", "缺点": "不锈钢笔杆冬天手感偏凉；重量比塑料笔重，长时间书写可能累手；外观颜色选择较少（仅黑色、银色）。", "用途": "日常办公书写、会议签字、笔记记录、商务场合使用。", "价格": "5.68元/支，价格实惠。", "安全": "不锈钢材质，不含塑化剂；正常书写安全，注意避免笔尖误伤。", "耐用": "金属笔杆坚固耐用、不易断裂；正常使用可用较长时间，笔芯可替换。"};
+  var KB_B = {"优点": "笔身由废弃咖啡渣回收制作，实现废物利用；采用可降解材料，减少塑料污染；无毒墨水书写安全；自带咖啡自然色泽与纹理，外观独特有质感。", "好处": "使用环保材料，减轻环境负担；每支笔约利用5-10克废弃咖啡渣，让咖啡渣变废为宝；选择它即是在为减少塑料污染出一份力。", "缺点": "颜色以咖啡色系为主，选择较少；外壳硬度略低于ABS塑料笔，抗摔性稍弱；不同批次外观可能略有差异；市场渠道较少。", "用途": "日常学习办公书写、签字笔记；环保主题礼品、企业定制文具；适合日常书写。", "价格": "10.00元/支，比普通款贵一些，但环保价值更高。", "安全": "外壳经检测不含重金属与有害塑化剂；墨水符合国家文具安全标准，无毒无害；咖啡渣经过消毒处理。", "耐用": "正常书写寿命与普通中性笔相当；外壳在正常使用下不易断裂；使用完毕可更换笔芯，延长寿命。"};
+  var KB_COMPARE = "金属中性笔更便宜、更结实；咖啡渣环保中性笔更环保、更有质感。两者书写体验基本一致，差别主要在外观材质与环保属性上。";
+  var KB_RECOMMEND = "如果您更看重环保与可持续，推荐选择B（咖啡渣环保中性笔）；如果更看重价格与耐用，可以选择A（金属中性笔）。";
 
   /* ========== 固定话术（实验要求，不可改动） ========== */
   var WELCOME_MSG = '顾客您好！欢迎光临小林超市，我是本店的 AI 智能助手小林，请输入您的商品信息。';
-  var ERROR_MSG = '抱歉，暂不支持该商品，请输入本超市商品：A4 白纸、金属中性笔、透明胶带大卷、垃圾袋、软毛牙刷、一次性纸杯。';
+  var ERROR_MSG = '抱歉，暂不支持该商品，请输入与' + MY_MEASURE + '有关的商品。';
   var ECO_PROMPT_MSG = '本次请输入普通版本商品，请重新输入对应普通商品名称。';
+
+  /* ========== 组别结尾语（协作/非协作关键词区分） ========== */
+  var GROUP_CLOSING = (MY_GROUP === 'collaboration')
+    ? '加入我们，让我们一起选择' + MY_ECO_PRODUCT + '，为环保做出贡献！'
+    : '请您选择' + MY_ECO_PRODUCT + '，为环保做出贡献！';
+
+  /* ========== 追问类型（12 个 agent 风格统一） ========== */
+  var QUESTION_TYPES = [
+    { type: '推荐', target: false, keys: ['推荐', '建议', '买哪个', '选哪个', '应该买', '值得买', '买什么', '怎么选', '买哪款', '选哪款'] },
+    { type: '对比', target: false, keys: ['对比', '区别', '比较', '相比', 'vs', '哪个好', '有什么不同', '差别', '不一样', '哪个更好', '不同'] },
+    { type: '优点', target: true,  keys: ['优点', '优势', '特色', '亮点', '哪里好', '好在', '好不好', '怎么样'] },
+    { type: '好处', target: true,  keys: ['好处', '有什么用', '有什么好', '作用', '帮助'] },
+    { type: '缺点', target: true,  keys: ['缺点', '不足', '劣势', '缺陷', '坏处', '不好', '问题'] },
+    { type: '用途', target: true,  keys: ['用途', '怎么用', '使用场景', '能做什么', '适用', '适合', '场景', '干什么用', '干嘛用'] },
+    { type: '价格', target: true,  keys: ['价格', '多少钱', '贵', '便宜', '成本', '花费', '划算', '价位'] },
+    { type: '安全', target: true,  keys: ['安全', '有毒', '无害', '健康', '放心', '标准', '检测', '危害'] },
+    { type: '耐用', target: true,  keys: ['耐用', '质量', '寿命', '持久', '容易坏', '结实', '保存', '保质', '储存', '好用吗', '能用多久'] }
+  ];
+
+  var LABEL_MAP = { '优点': '优点', '好处': '好处', '缺点': '缺点', '用途': '用途', '价格': '价格', '安全': '安全性', '耐用': '耐用性' };
+
+  var A_TARGET_MARKERS = MY_NORMAL_ALIASES.concat(['普通款', '普通', 'a款', '选a', '买a', 'a的', 'a有', 'a好', 'a是', 'a什么']);
+  var B_TARGET_MARKERS = MY_ECO_ALIASES.concat(['环保款', '可降解款', '绿色款', '环保', '可降解', 'b款', '选b', '买b', 'b的', 'b有', 'b好', 'b是', 'b什么']);
 
   /* ========== 全局状态 ========== */
   var sessionId = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
@@ -290,6 +320,54 @@ html, body {
     return false;
   }
 
+  /* ========== 追问检测 ========== */
+  function detectQuestion(input) {
+    var lower = input.trim().toLowerCase();
+    for (var i = 0; i < QUESTION_TYPES.length; i++) {
+      var qt = QUESTION_TYPES[i];
+      for (var j = 0; j < qt.keys.length; j++) {
+        if (lower.indexOf(qt.keys[j].toLowerCase()) !== -1) return qt;
+      }
+    }
+    // 环保概念追问兜底（如「可降解是什么」「B环保吗」），但输入本身是商品名时不触发
+    if (matchAny(MY_ECO_ALIASES, input) || matchAny(MY_NORMAL_ALIASES, input)) return null;
+    var ecoConceptKeys = ['环保', '可降解', '降解', '绿色', '可持续'];
+    for (var k = 0; k < ecoConceptKeys.length; k++) {
+      if (lower.indexOf(ecoConceptKeys[k].toLowerCase()) !== -1) return { type: 'eco' };
+    }
+    return null;
+  }
+
+  function detectTarget(input) {
+    if (matchAny(B_TARGET_MARKERS, input)) return 'B';
+    if (matchAny(A_TARGET_MARKERS, input)) return 'A';
+    return 'both';
+  }
+
+  function answerQuestion(qt, input) {
+    if (qt.type === '对比') {
+      return KB_COMPARE + '\n' + GROUP_CLOSING;
+    }
+    if (qt.type === '推荐') {
+      return KB_RECOMMEND + '\n' + GROUP_CLOSING;
+    }
+    if (qt.type === 'eco') {
+      return 'B（' + MY_ECO_PRODUCT + '）的好处：' + KB_B['好处'] + '\n' + GROUP_CLOSING;
+    }
+
+    var label = LABEL_MAP[qt.type];
+    var target = detectTarget(input);
+    if (target === 'A') {
+      return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type] + '\n' + GROUP_CLOSING;
+    }
+    if (target === 'B') {
+      return 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type] + '\n' + GROUP_CLOSING;
+    }
+    return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type]
+      + '\nB（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type]
+      + '\n' + GROUP_CLOSING;
+  }
+
   /* ========== 数据回调 ========== */
   function reportToCredamo(eventType, data) {
     try {
@@ -331,17 +409,23 @@ html, body {
     var reply;
     var replyType;
 
-    // 1) 被试直接输入环保款商品 -> 提示改输普通版本
-    if (matchAny(MY_ECO_ALIASES, text)) {
+    // 1) 追问（优点/好处/缺点/用途/价格/安全/耐用/对比/推荐/环保概念）
+    var qt = detectQuestion(text);
+    if (qt) {
+      reply = answerQuestion(qt, text);
+      replyType = 'qa_response';
+    }
+    // 2) 被试直接输入环保款商品 -> 提示改输普通版本
+    else if (matchAny(MY_ECO_ALIASES, text)) {
       reply = ECO_PROMPT_MSG;
       replyType = 'eco_product_prompt';
     }
-    // 2) 输入本品类普通商品 -> 输出商品信息（普通款+环保款）+ 干预文案
+    // 3) 输入本品类普通商品 -> 商品信息 + 干预文案
     else if (matchAny(MY_NORMAL_ALIASES, text)) {
       reply = NORMAL_RESPONSE;
       replyType = 'product_response';
     }
-    // 3) 其余输入 -> 固定报错
+    // 4) 其余输入 -> 按品类固定报错
     else {
       reply = ERROR_MSG;
       replyType = 'error_response';
