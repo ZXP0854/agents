@@ -182,15 +182,23 @@ white-space: nowrap;
   var KB_COMPARE = "金属中性笔更便宜、更结实；咖啡渣环保中性笔更环保、更有质感。两者书写体验基本一致，差别主要在外观材质与环保属性上。";
   var KB_RECOMMEND = "如果您更看重环保与可持续，推荐选择B（咖啡渣环保中性笔）；如果更看重价格与耐用，可以选择A（金属中性笔）。";
 
+  /* ========== 引导语（区别于核心操纵句，不在每次追问时重复） ========== */
+  var FOLLOWUP_CLOSING = (MY_GROUP === 'collaboration')
+    ? '欢迎随时向我询问这两款' + MY_MEASURE + '的优缺点、价格或推荐，我很乐意为您解答。'
+    : '欢迎随时向我询问这两款' + MY_MEASURE + '的优缺点、价格或推荐，我很乐意为您解答。';
+
   /* ========== 固定话术（实验要求，不可改动） ========== */
   var WELCOME_MSG = '顾客您好！欢迎光临小林超市，我是本店的 AI 智能助手小林，请输入您的商品信息。';
   var ERROR_MSG = '抱歉，暂不支持该商品，请输入与' + MY_MEASURE + '有关的商品。';
   var ECO_PROMPT_MSG = '本次请输入普通版本商品，请重新输入对应普通商品名称。';
 
-  /* ========== 组别结尾语（协作/非协作关键词区分） ========== */
-  var GROUP_CLOSING = (MY_GROUP === 'collaboration')
-    ? '加入我们，让我们一起选择' + MY_ECO_PRODUCT + '，为环保做出贡献！'
-    : '请您选择' + MY_ECO_PRODUCT + '，为环保做出贡献！';
+  /* ========== 输入框灰字（提示语） ========== */
+  var PLACEHOLDER_INITIAL = '请输入产品名称…';
+  var PLACEHOLDER_ACTIVE = '您现在可以询问两款产品的具体信息';
+
+  function updatePlaceholder() {
+    userInput.placeholder = PLACEHOLDER_ACTIVE;
+  }
 
   /* ========== 追问类型（12 个 agent 风格统一） ========== */
   var QUESTION_TYPES = [
@@ -309,26 +317,26 @@ white-space: nowrap;
 
   function answerQuestion(qt, input) {
     if (qt.type === '对比') {
-      return KB_COMPARE + '\n' + GROUP_CLOSING;
+      return KB_COMPARE + '\n' + FOLLOWUP_CLOSING;
     }
     if (qt.type === '推荐') {
-      return KB_RECOMMEND + '\n' + GROUP_CLOSING;
+      return KB_RECOMMEND + '\n' + FOLLOWUP_CLOSING;
     }
     if (qt.type === 'eco') {
-      return 'B（' + MY_ECO_PRODUCT + '）的好处：' + KB_B['好处'] + '\n' + GROUP_CLOSING;
+      return 'B（' + MY_ECO_PRODUCT + '）的好处：' + KB_B['好处'] + '\n' + FOLLOWUP_CLOSING;
     }
 
     var label = LABEL_MAP[qt.type];
     var target = detectTarget(input);
     if (target === 'A') {
-      return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type] + '\n' + GROUP_CLOSING;
+      return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type] + '\n' + FOLLOWUP_CLOSING;
     }
     if (target === 'B') {
-      return 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type] + '\n' + GROUP_CLOSING;
+      return 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type] + '\n' + FOLLOWUP_CLOSING;
     }
     return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type]
       + '\nB（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type]
-      + '\n' + GROUP_CLOSING;
+      + '\n' + FOLLOWUP_CLOSING;
   }
 
   /* ========== 数据回调 ========== */
@@ -377,6 +385,7 @@ white-space: nowrap;
     if (qt) {
       reply = answerQuestion(qt, text);
       replyType = 'qa_response';
+      updatePlaceholder();
     }
     // 2) 被试直接输入环保款商品 -> 提示改输普通版本
     else if (matchAny(MY_ECO_ALIASES, text)) {
@@ -387,6 +396,7 @@ white-space: nowrap;
     else if (matchAny(MY_NORMAL_ALIASES, text)) {
       reply = NORMAL_RESPONSE;
       replyType = 'product_response';
+      updatePlaceholder();
     }
     // 4) 其余输入 -> 按品类固定报错
     else {
