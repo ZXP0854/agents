@@ -193,7 +193,7 @@ html, body {
   <div class="chat-area" id="chatArea"></div>
 
   <div class="input-area">
-    <input type="text" id="userInput" placeholder="请输入产品名称…" autocomplete="off" enterkeyhint="send">
+    <input type="text" id="userInput" placeholder="请输入产品名称" autocomplete="off" enterkeyhint="send">
     <button id="sendBtn">发送</button>
   </div>
 </div>
@@ -211,7 +211,8 @@ html, body {
   var MY_GROUP = "non_collaboration";
   var MY_NORMAL_ALIASES = ["软毛牙刷", "普通软毛牙刷", "牙刷", "毛刷"];
   var MY_ECO_ALIASES = ["竹制环保牙刷", "竹牙刷", "竹制牙刷"];
-  var NORMAL_RESPONSE = "本店有两种牙刷售卖：\n\nA（非环保产品）普通软毛牙刷\n透明塑料手柄，有黑、棕、透粉三色；小刷头，黑色炭丝软毛，家用成人款\n价格：12.90元\n\nB（环保产品）竹制环保牙刷\n天然竹木手柄，手柄印有品牌字样；搭配不同颜色竹炭软毛刷头，牛皮纸盒独立包装，共8支，风格天然质朴\n价格：14.21元\n\n请选择绿色消费！\n竹牙刷选用可降解竹制环保材质制成，材料可自然分解，不产生长期塑料污染，有效减轻环境负担。已有65%的消费者选择了竹牙刷。请您选择竹牙刷，以每一次选择传递环保力量，让绿色成为生活个人习惯。";
+  var MY_COPY = "请选择绿色消费！\n竹牙刷选用可降解竹制环保材质制成，材料可自然分解，不产生长期塑料污染，有效减轻环境负担。已有65%的消费者选择了竹牙刷。请您选择竹牙刷，以每一次选择传递环保力量，让绿色成为生活个人习惯。";
+  var PRODUCT_INFO = "本店有两种牙刷售卖：\n\nA（非环保产品）普通软毛牙刷\n透明塑料手柄，有黑、棕、透粉三色；小刷头，黑色炭丝软毛，家用成人款\n价格：12.90元\n\nB（环保产品）竹制环保牙刷\n天然竹木手柄，手柄印有品牌字样；搭配不同颜色竹炭软毛刷头，牛皮纸盒独立包装，共8支，风格天然质朴\n价格：14.21元";
 
   /* ========== A/B 知识库 ========== */
   var KB_A = {"优点": "透明塑料手柄，三色可选；小刷头、炭丝软毛，清洁细腻；家用成人款，价格实惠。", "好处": "刷毛柔软，呵护牙龈；价格便宜，定期更换不心疼。", "缺点": "塑料手柄难以降解，废弃后对环境造成负担。", "用途": "日常早晚刷牙清洁。", "价格": "12.90元/支。", "安全": "食品级刷毛，符合口腔用品安全标准。", "耐用": "建议每3个月更换，正常使用期内刷毛不易变形。", "材质": "透明塑料手柄，炭丝软毛刷头。", "规格": "小刷头，黑、棕、透粉三色，家用成人款。", "效果": "软毛清洁细腻，呵护牙龈。", "性价比": "12.90元/支，价格实惠。", "口碑": "常见家用牙刷，销量稳定。", "环保意义": "塑料手柄难降解，环保意义较弱。", "降解": "塑料手柄需数百年降解。", "购买渠道": "超市、便利店、电商平台随处可买。", "适用人群": "成人日常口腔清洁。", "注意事项": "建议每3个月更换。"};
@@ -279,12 +280,30 @@ html, body {
   var FALLBACK_QA_MSG = '关于这个问题我暂时没有更多信息。您可以向我询问这两款' + MY_MEASURE + '的：优点、缺点、好处、用途、价格、材质、规格、效果、性价比、口碑、环保意义、降解情况、购买渠道、适用人群、注意事项等。';
   var HELP_MSG = '您可以向我询问这两款' + MY_MEASURE + '的以下具体信息：\n1. 优点、好处、缺点；\n2. 用途、价格、材质、规格、效果；\n3. 性价比、口碑、安全性、耐用性；\n4. 环保意义、降解情况、购买渠道、适用人群、注意事项；\n5. 两款商品的对比，或让我为您推荐。\n您也可以了解环保知识，例如"PLA是什么""可降解是什么意思"等。';
 
-  /* ========== 输入框灰字（提示语） ========== */
-  var PLACEHOLDER_INITIAL = '请输入产品名称…';
-  var PLACEHOLDER_ACTIVE = '您现在可以询问两款产品的具体信息';
+  /* ========== 输入框灰字（提示语，随流程三阶段切换） ========== */
+  var PLACEHOLDER_INITIAL = '请输入产品名称';
+  var PLACEHOLDER_ASK_PRODUCT = '询问本店可购买的商品';
+  var PLACEHOLDER_ACTIVE = '您现在可以询问两种商品的具体信息';
 
-  function updatePlaceholder() {
-    userInput.placeholder = PLACEHOLDER_ACTIVE;
+  function setPlaceholder(state) {
+    if (state === 1) {
+      userInput.placeholder = PLACEHOLDER_ASK_PRODUCT;
+    } else if (state >= 2) {
+      userInput.placeholder = PLACEHOLDER_ACTIVE;
+    } else {
+      userInput.placeholder = PLACEHOLDER_INITIAL;
+    }
+  }
+
+  /* ========== 询问商品意图检测（阶段2） ========== */
+  var ASK_PRODUCT_KEYS = ['有什么商品', '有哪些商品', '有什么', '有哪些', '卖什么', '卖哪些', '卖的东西', '售卖', '可购买', '本店有什么', '本店有哪些', '商品有哪些', '商品有什么', '商品', '卖'];
+
+  function isAskProduct(input) {
+    var lower = input.trim().toLowerCase();
+    for (var i = 0; i < ASK_PRODUCT_KEYS.length; i++) {
+      if (lower.indexOf(ASK_PRODUCT_KEYS[i].toLowerCase()) !== -1) return true;
+    }
+    return false;
   }
 
   /* ========== 追问类型（12 个 agent 风格统一，具体类型优先） ========== */
@@ -326,10 +345,13 @@ html, body {
   var userInput = document.getElementById('userInput');
   var sendBtn = document.getElementById('sendBtn');
   var interactionLog = [];
+  // 流程阶段：0=待输入商品；1=已展示干预文案，待询问商品信息；2=已展示商品信息，进入自由追问
+  var flowStage = 0;
 
   /* ========== 初始化 ========== */
   function init() {
     showWelcome(WELCOME_MSG);
+    setPlaceholder(0);
     reportToCredamo('session_init', { category: MY_CATEGORY, product: MY_NORMAL_PRODUCT, group: MY_GROUP });
     sendBtn.addEventListener('click', handleSend);
     userInput.addEventListener('keydown', function(e) {
@@ -515,52 +537,88 @@ html, body {
 
     var reply;
     var replyType;
+    var nextStage = flowStage;
 
-    // 1) 追问（优点/好处/缺点/用途/价格/安全/耐用/对比/推荐/环保概念）
-    var qt = detectQuestion(text);
-    if (qt) {
-      if (qt.type === 'unknown') {
-        reply = FALLBACK_QA_MSG;
-        replyType = 'fallback_qa';
+    // 阶段0：等待被试输入普通商品 -> 展示核心操纵文案（干预文案）
+    if (flowStage === 0) {
+      if (matchAny(MY_NORMAL_ALIASES, text)) {
+        reply = MY_COPY;
+        replyType = 'product_copy';
+        nextStage = 1;
+        setPlaceholder(1);
+      } else if (matchAny(MY_ECO_ALIASES, text)) {
+        reply = ECO_PROMPT_MSG;
+        replyType = 'eco_product_prompt';
       } else {
-        reply = answerQuestion(qt, text);
-        replyType = 'qa_response';
+        reply = ERROR_MSG;
+        replyType = 'error_response';
       }
-      updatePlaceholder();
     }
-    // 2) 被试直接输入环保款商品 -> 提示改输普通版本
-    else if (matchAny(MY_ECO_ALIASES, text)) {
-      reply = ECO_PROMPT_MSG;
-      replyType = 'eco_product_prompt';
+    // 阶段1：已展示干预文案，引导询问本店商品 -> 展示 A/B 外观+价格
+    else if (flowStage === 1) {
+      if (isAskProduct(text)) {
+        reply = PRODUCT_INFO;
+        replyType = 'product_info';
+        nextStage = 2;
+        setPlaceholder(2);
+      } else {
+        // 尚未询问商品，继续引导
+        reply = '您还没有询问本店可购买的商品哦，请输入"本店有什么商品"或商品名称，我来为您介绍。';
+        replyType = 'guidance';
+      }
     }
-    // 3) 输入本品类普通商品 -> 商品信息 + 干预文案
-    else if (matchAny(MY_NORMAL_ALIASES, text)) {
-      reply = NORMAL_RESPONSE;
-      replyType = 'product_response';
-      updatePlaceholder();
-    }
-    // 4) 其余输入 -> 按品类固定报错
+    // 阶段2：已展示商品信息，进入自由问答
     else {
-      reply = ERROR_MSG;
-      replyType = 'error_response';
-    }
-
-    // 5) 词库未覆盖的追问（含疑问语气但未命中任何词库）-> 引导可询问内容
-    if (replyType === 'error_response') {
-      var askMarkers = ['?', '？', '吗', '呢', '么', '什么', '怎么', '如何', '多少', '哪个', '哪'];
-      for (var ai = 0; ai < askMarkers.length; ai++) {
-        if (text.indexOf(askMarkers[ai]) !== -1) {
+      var qt = detectQuestion(text);
+      if (qt) {
+        if (qt.type === 'unknown') {
           reply = FALLBACK_QA_MSG;
           replyType = 'fallback_qa';
-          break;
+        } else {
+          reply = answerQuestion(qt, text);
+          replyType = 'qa_response';
+        }
+      }
+      // 被试再次输入环保款商品 -> 提示改输普通版本
+      else if (matchAny(MY_ECO_ALIASES, text)) {
+        reply = ECO_PROMPT_MSG;
+        replyType = 'eco_product_prompt';
+      }
+      // 被试再次询问商品信息 -> 重新展示 A/B 外观+价格
+      else if (isAskProduct(text)) {
+        reply = PRODUCT_INFO;
+        replyType = 'product_info';
+      }
+      // 再次输入普通商品 -> 重新展示干预文案
+      else if (matchAny(MY_NORMAL_ALIASES, text)) {
+        reply = MY_COPY;
+        replyType = 'product_copy';
+      }
+      // 其余输入 -> 按品类固定报错
+      else {
+        reply = ERROR_MSG;
+        replyType = 'error_response';
+      }
+
+      // 词库未覆盖的追问（含疑问语气但未命中任何词库）-> 引导可询问内容
+      if (replyType === 'error_response') {
+        var askMarkers = ['?', '？', '吗', '呢', '么', '什么', '怎么', '如何', '多少', '哪个', '哪'];
+        for (var ai = 0; ai < askMarkers.length; ai++) {
+          if (text.indexOf(askMarkers[ai]) !== -1) {
+            reply = FALLBACK_QA_MSG;
+            replyType = 'fallback_qa';
+            break;
+          }
         }
       }
     }
 
+    flowStage = nextStage;
+
     sendBtn.disabled = true;
     setTimeout(function() {
       replaceWithSystemMessage(loadingDiv, reply);
-      reportToCredamo(replyType, { input: text });
+      reportToCredamo(replyType, { input: text, stage: flowStage });
       sendBtn.disabled = false;
     }, 300);
   }

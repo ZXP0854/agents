@@ -625,7 +625,8 @@ JS_TEMPLATE = """
   var MY_GROUP = __GROUP_LABEL__;
   var MY_NORMAL_ALIASES = __NORMAL_ALIASES__;
   var MY_ECO_ALIASES = __ECO_ALIASES__;
-  var NORMAL_RESPONSE = __NORMAL_RESPONSE__;
+  var MY_COPY = __COPY__;
+  var PRODUCT_INFO = __PRODUCT_INFO__;
 
   /* ========== A/B 知识库 ========== */
   var KB_A = __KB_A__;
@@ -693,12 +694,30 @@ JS_TEMPLATE = """
   var FALLBACK_QA_MSG = '关于这个问题我暂时没有更多信息。您可以向我询问这两款' + MY_MEASURE + '的：优点、缺点、好处、用途、价格、材质、规格、效果、性价比、口碑、环保意义、降解情况、购买渠道、适用人群、注意事项等。';
   var HELP_MSG = '您可以向我询问这两款' + MY_MEASURE + '的以下具体信息：\\n1. 优点、好处、缺点；\\n2. 用途、价格、材质、规格、效果；\\n3. 性价比、口碑、安全性、耐用性；\\n4. 环保意义、降解情况、购买渠道、适用人群、注意事项；\\n5. 两款商品的对比，或让我为您推荐。\\n您也可以了解环保知识，例如"PLA是什么""可降解是什么意思"等。';
 
-  /* ========== 输入框灰字（提示语） ========== */
-  var PLACEHOLDER_INITIAL = '请输入产品名称…';
-  var PLACEHOLDER_ACTIVE = '您现在可以询问两款产品的具体信息';
+  /* ========== 输入框灰字（提示语，随流程三阶段切换） ========== */
+  var PLACEHOLDER_INITIAL = '请输入产品名称';
+  var PLACEHOLDER_ASK_PRODUCT = '询问本店可购买的商品';
+  var PLACEHOLDER_ACTIVE = '您现在可以询问两种商品的具体信息';
 
-  function updatePlaceholder() {
-    userInput.placeholder = PLACEHOLDER_ACTIVE;
+  function setPlaceholder(state) {
+    if (state === 1) {
+      userInput.placeholder = PLACEHOLDER_ASK_PRODUCT;
+    } else if (state >= 2) {
+      userInput.placeholder = PLACEHOLDER_ACTIVE;
+    } else {
+      userInput.placeholder = PLACEHOLDER_INITIAL;
+    }
+  }
+
+  /* ========== 询问商品意图检测（阶段2） ========== */
+  var ASK_PRODUCT_KEYS = ['有什么商品', '有哪些商品', '有什么', '有哪些', '卖什么', '卖哪些', '卖的东西', '售卖', '可购买', '本店有什么', '本店有哪些', '商品有哪些', '商品有什么', '商品', '卖'];
+
+  function isAskProduct(input) {
+    var lower = input.trim().toLowerCase();
+    for (var i = 0; i < ASK_PRODUCT_KEYS.length; i++) {
+      if (lower.indexOf(ASK_PRODUCT_KEYS[i].toLowerCase()) !== -1) return true;
+    }
+    return false;
   }
 
   /* ========== 追问类型（12 个 agent 风格统一，具体类型优先） ========== */
@@ -740,10 +759,13 @@ JS_TEMPLATE = """
   var userInput = document.getElementById('userInput');
   var sendBtn = document.getElementById('sendBtn');
   var interactionLog = [];
+  // 流程阶段：0=待输入商品；1=已展示干预文案，待询问商品信息；2=已展示商品信息，进入自由追问
+  var flowStage = 0;
 
   /* ========== 初始化 ========== */
   function init() {
     showWelcome(WELCOME_MSG);
+    setPlaceholder(0);
     reportToCredamo('session_init', { category: MY_CATEGORY, product: MY_NORMAL_PRODUCT, group: MY_GROUP });
     sendBtn.addEventListener('click', handleSend);
     userInput.addEventListener('keydown', function(e) {
@@ -929,52 +951,88 @@ JS_TEMPLATE = """
 
     var reply;
     var replyType;
+    var nextStage = flowStage;
 
-    // 1) 追问（优点/好处/缺点/用途/价格/安全/耐用/对比/推荐/环保概念）
-    var qt = detectQuestion(text);
-    if (qt) {
-      if (qt.type === 'unknown') {
-        reply = FALLBACK_QA_MSG;
-        replyType = 'fallback_qa';
+    // 阶段0：等待被试输入普通商品 -> 展示核心操纵文案（干预文案）
+    if (flowStage === 0) {
+      if (matchAny(MY_NORMAL_ALIASES, text)) {
+        reply = MY_COPY;
+        replyType = 'product_copy';
+        nextStage = 1;
+        setPlaceholder(1);
+      } else if (matchAny(MY_ECO_ALIASES, text)) {
+        reply = ECO_PROMPT_MSG;
+        replyType = 'eco_product_prompt';
       } else {
-        reply = answerQuestion(qt, text);
-        replyType = 'qa_response';
+        reply = ERROR_MSG;
+        replyType = 'error_response';
       }
-      updatePlaceholder();
     }
-    // 2) 被试直接输入环保款商品 -> 提示改输普通版本
-    else if (matchAny(MY_ECO_ALIASES, text)) {
-      reply = ECO_PROMPT_MSG;
-      replyType = 'eco_product_prompt';
+    // 阶段1：已展示干预文案，引导询问本店商品 -> 展示 A/B 外观+价格
+    else if (flowStage === 1) {
+      if (isAskProduct(text)) {
+        reply = PRODUCT_INFO;
+        replyType = 'product_info';
+        nextStage = 2;
+        setPlaceholder(2);
+      } else {
+        // 尚未询问商品，继续引导
+        reply = '您还没有询问本店可购买的商品哦，请输入"本店有什么商品"或商品名称，我来为您介绍。';
+        replyType = 'guidance';
+      }
     }
-    // 3) 输入本品类普通商品 -> 商品信息 + 干预文案
-    else if (matchAny(MY_NORMAL_ALIASES, text)) {
-      reply = NORMAL_RESPONSE;
-      replyType = 'product_response';
-      updatePlaceholder();
-    }
-    // 4) 其余输入 -> 按品类固定报错
+    // 阶段2：已展示商品信息，进入自由问答
     else {
-      reply = ERROR_MSG;
-      replyType = 'error_response';
-    }
-
-    // 5) 词库未覆盖的追问（含疑问语气但未命中任何词库）-> 引导可询问内容
-    if (replyType === 'error_response') {
-      var askMarkers = ['?', '？', '吗', '呢', '么', '什么', '怎么', '如何', '多少', '哪个', '哪'];
-      for (var ai = 0; ai < askMarkers.length; ai++) {
-        if (text.indexOf(askMarkers[ai]) !== -1) {
+      var qt = detectQuestion(text);
+      if (qt) {
+        if (qt.type === 'unknown') {
           reply = FALLBACK_QA_MSG;
           replyType = 'fallback_qa';
-          break;
+        } else {
+          reply = answerQuestion(qt, text);
+          replyType = 'qa_response';
+        }
+      }
+      // 被试再次输入环保款商品 -> 提示改输普通版本
+      else if (matchAny(MY_ECO_ALIASES, text)) {
+        reply = ECO_PROMPT_MSG;
+        replyType = 'eco_product_prompt';
+      }
+      // 被试再次询问商品信息 -> 重新展示 A/B 外观+价格
+      else if (isAskProduct(text)) {
+        reply = PRODUCT_INFO;
+        replyType = 'product_info';
+      }
+      // 再次输入普通商品 -> 重新展示干预文案
+      else if (matchAny(MY_NORMAL_ALIASES, text)) {
+        reply = MY_COPY;
+        replyType = 'product_copy';
+      }
+      // 其余输入 -> 按品类固定报错
+      else {
+        reply = ERROR_MSG;
+        replyType = 'error_response';
+      }
+
+      // 词库未覆盖的追问（含疑问语气但未命中任何词库）-> 引导可询问内容
+      if (replyType === 'error_response') {
+        var askMarkers = ['?', '？', '吗', '呢', '么', '什么', '怎么', '如何', '多少', '哪个', '哪'];
+        for (var ai = 0; ai < askMarkers.length; ai++) {
+          if (text.indexOf(askMarkers[ai]) !== -1) {
+            reply = FALLBACK_QA_MSG;
+            replyType = 'fallback_qa';
+            break;
+          }
         }
       }
     }
 
+    flowStage = nextStage;
+
     sendBtn.disabled = true;
     setTimeout(function() {
       replaceWithSystemMessage(loadingDiv, reply);
-      reportToCredamo(replyType, { input: text });
+      reportToCredamo(replyType, { input: text, stage: flowStage });
       sendBtn.disabled = false;
     }, 300);
   }
@@ -989,8 +1047,8 @@ JS_TEMPLATE = """
 """
 
 
-def build_normal_response(cat, copy):
-    """普通款输入 -> 「本店有两种X售卖：」+ 非环保款/环保款外观价格 + 干预文案。"""
+def build_product_info(cat):
+    """阶段2：展示 A/B 两款商品的外观与价格信息。"""
     return (
         '本店有两种%s售卖：\n\n'
         'A（非环保产品）%s\n'
@@ -998,12 +1056,10 @@ def build_normal_response(cat, copy):
         '价格：%s元\n\n'
         'B（环保产品）%s\n'
         '%s\n'
-        '价格：%s元\n\n'
-        '%s' % (
+        '价格：%s元' % (
             cat['measure'],
             cat['normal_name'], cat['normal_appearance'], cat['normal_price'],
             cat['eco_name'], cat['eco_appearance'], cat['eco_price'],
-            copy
         )
     )
 
@@ -1012,7 +1068,7 @@ def generate_html(group_type, cat):
     group_label = 'collaboration' if group_type == 'collaboration' else 'non_collaboration'
     copy_dict = COLLABORATION_COPY if group_type == 'collaboration' else NON_COLLABORATION_COPY
     copy = copy_dict[cat['copy_key']]
-    normal_response = build_normal_response(cat, copy)
+    product_info = build_product_info(cat)
 
     # 合并基础知识库（7 项）与扩展知识库（10 项）
     extra = EXTRA_KB[cat['category']]
@@ -1029,7 +1085,8 @@ def generate_html(group_type, cat):
           .replace('__GROUP_LABEL__', json.dumps(group_label, ensure_ascii=False))
           .replace('__NORMAL_ALIASES__', json.dumps(cat['normal_aliases'], ensure_ascii=False))
           .replace('__ECO_ALIASES__', json.dumps(cat['eco_aliases'], ensure_ascii=False))
-          .replace('__NORMAL_RESPONSE__', json.dumps(normal_response, ensure_ascii=False))
+          .replace('__COPY__', json.dumps(copy, ensure_ascii=False))
+          .replace('__PRODUCT_INFO__', json.dumps(product_info, ensure_ascii=False))
           .replace('__ECO_CONCEPTS__', json.dumps(ECO_CONCEPTS, ensure_ascii=False))
           .replace('__ECO_CONCEPT_KEYWORDS__', json.dumps(ECO_CONCEPT_KEYWORDS, ensure_ascii=False))
           .replace('__KB_A__', json.dumps(kb_a, ensure_ascii=False))
@@ -1052,7 +1109,7 @@ def generate_html(group_type, cat):
             '  </header>\n\n'
             '  <div class="chat-area" id="chatArea"></div>\n\n'
             '  <div class="input-area">\n'
-            '    <input type="text" id="userInput" placeholder="请输入产品名称…" autocomplete="off" enterkeyhint="send">\n'
+            '    <input type="text" id="userInput" placeholder="请输入产品名称" autocomplete="off" enterkeyhint="send">\n'
             '    <button id="sendBtn">发送</button>\n'
             '  </div>\n'
             '</div>\n\n'
