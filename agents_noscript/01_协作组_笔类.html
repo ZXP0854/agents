@@ -239,6 +239,7 @@ white-space: nowrap;
   var WELCOME_MSG = '顾客您好！欢迎光临小林超市，我是本店的 AI 智能助手小林，请输入您的商品信息。';
   var ERROR_MSG = '抱歉，暂不支持该商品，请输入与' + MY_MEASURE + '有关的商品。';
   var ECO_PROMPT_MSG = '本次请输入普通版本商品，请重新输入对应普通商品名称。';
+  var FALLBACK_QA_MSG = '关于这个问题我暂时没有更多信息。您可以向我询问这两款' + MY_MEASURE + '的：优点、缺点、好处、用途、价格、材质、规格、效果、性价比、口碑、环保意义、降解情况、购买渠道、适用人群、注意事项等。';
 
   /* ========== 输入框灰字（提示语） ========== */
   var PLACEHOLDER_INITIAL = '请输入产品名称…';
@@ -360,20 +361,9 @@ white-space: nowrap;
     if (trimmed === MY_NORMAL_PRODUCT || trimmed === MY_ECO_PRODUCT) return null;
     var lower = trimmed.toLowerCase();
 
-    // 1) 含疑问词的环保概念科普（如「PLA是什么」「咖啡渣是什么」），优先于商品别名
-    var askWords = ['是什么', '什么是', '什么意思', '指的是', '啥意思', '意思'];
-    var hasAsk = false;
-    for (var a = 0; a &lt; askWords.length; a++) {
-      if (lower.indexOf(askWords[a].toLowerCase()) !== -1) { hasAsk = true; break; }
-    }
-    if (hasAsk) {
-      var conceptKeys = ['PLA', '聚乳酸', '咖啡渣', '甘蔗浆', '蔗渣', '竹纤维', '玉米淀粉', '塑料污染', '碳足迹', '循环经济', '绿色消费'];
-      for (var k = 0; k &lt; conceptKeys.length; k++) {
-        if (lower.indexOf(conceptKeys[k].toLowerCase()) !== -1) return { type: 'concept' };
-      }
-    }
+    var conceptKeys = ['PLA', '聚乳酸', '咖啡渣', '甘蔗浆', '蔗渣', '竹纤维', '玉米淀粉', '塑料污染', '碳足迹', '循环经济', '绿色消费'];
 
-    // 2) 追问类型匹配（具体类型优先）
+    // 1) 追问类型匹配（具体类型优先：优点/价格/材质/环保意义…）
     for (var i = 0; i &lt; QUESTION_TYPES.length; i++) {
       var qt = QUESTION_TYPES[i];
       for (var j = 0; j &lt; qt.keys.length; j++) {
@@ -381,10 +371,28 @@ white-space: nowrap;
       }
     }
 
-    // 3) 环保概念兜底（无明确疑问词但含概念词），商品名输入不触发
-    if (matchAny(MY_ECO_ALIASES, input) || matchAny(MY_NORMAL_ALIASES, input)) return null;
-    for (var m = 0; m &lt; conceptKeys.length; m++) {
-      if (lower.indexOf(conceptKeys[m].toLowerCase()) !== -1) return { type: 'concept' };
+    // 2) 含明确疑问词的环保概念科普（如「PLA是什么」「咖啡渣是什么」）
+    var askWords = ['是什么', '什么是', '什么意思', '指的是', '啥意思', '意思'];
+    for (var a = 0; a &lt; askWords.length; a++) {
+      if (lower.indexOf(askWords[a].toLowerCase()) !== -1) {
+        for (var k = 0; k &lt; conceptKeys.length; k++) {
+          if (lower.indexOf(conceptKeys[k].toLowerCase()) !== -1) return { type: 'concept' };
+        }
+      }
+    }
+
+    // 3) 无明确疑问词但含环保概念词（如「塑料污染」「碳足迹」），纯商品名不触发
+    var isPureProduct = matchAny(MY_ECO_ALIASES, input) || matchAny(MY_NORMAL_ALIASES, input);
+    if (!isPureProduct) {
+      for (var m = 0; m &lt; conceptKeys.length; m++) {
+        if (lower.indexOf(conceptKeys[m].toLowerCase()) !== -1) return { type: 'concept' };
+      }
+    }
+
+    // 4) 含疑问语气但未命中任何词库 -> 标记为未知追问（走兜底引导）
+    var askMarkers = ['?', '？', '吗', '呢', '什么', '怎么', '如何', '多少', '哪个'];
+    for (var n = 0; n &lt; askMarkers.length; n++) {
+      if (lower.indexOf(askMarkers[n].toLowerCase()) !== -1) return { type: 'unknown' };
     }
     return null;
   }
@@ -469,8 +477,13 @@ white-space: nowrap;
     // 1) 追问（优点/好处/缺点/用途/价格/安全/耐用/对比/推荐/环保概念）
     var qt = detectQuestion(text);
     if (qt) {
-      reply = answerQuestion(qt, text);
-      replyType = 'qa_response';
+      if (qt.type === 'unknown') {
+        reply = FALLBACK_QA_MSG;
+        replyType = 'fallback_qa';
+      } else {
+        reply = answerQuestion(qt, text);
+        replyType = 'qa_response';
+      }
       updatePlaceholder();
     }
     // 2) 被试直接输入环保款商品 -> 提示改输普通版本
@@ -488,6 +501,18 @@ white-space: nowrap;
     else {
       reply = ERROR_MSG;
       replyType = 'error_response';
+    }
+
+    // 5) 词库未覆盖的追问（含疑问语气但未命中任何词库）-> 引导可询问内容
+    if (replyType === 'error_response') {
+      var askMarkers = ['?', '？', '吗', '呢', '么', '什么', '怎么', '如何', '多少', '哪个', '哪'];
+      for (var ai = 0; ai &lt; askMarkers.length; ai++) {
+        if (text.indexOf(askMarkers[ai]) !== -1) {
+          reply = FALLBACK_QA_MSG;
+          replyType = 'fallback_qa';
+          break;
+        }
+      }
     }
 
     sendBtn.disabled = true;
