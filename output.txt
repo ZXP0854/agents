@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "generate_word_doc.py", line 46, in <module>
-    info.add_run(f'生成日期：{datetime.date.today().strftime("%Y年%m月%d日")}').font.size = Pt(12)
-UnicodeEncodeError: 'locale' codec can't encode character '\u5e74' in position 2: Illegal byte sequence
