@@ -731,8 +731,8 @@ JS_TEMPLATE = """
   var ECO_CONCEPTS = __ECO_CONCEPTS__;
   var ECO_CONCEPT_KEYWORDS = __ECO_CONCEPT_KEYWORDS__;
 
-  var A_TARGET_MARKERS = MY_NORMAL_ALIASES.concat(['普通款', '普通', 'a款', '选a', '买a', 'a的', 'a有', 'a好', 'a是', 'a什么']);
-  var B_TARGET_MARKERS = MY_ECO_ALIASES.concat(['环保款', '可降解款', '绿色款', '环保', '可降解', 'b款', '选b', '买b', 'b的', 'b有', 'b好', 'b是', 'b什么']);
+  var A_TARGET_MARKERS = MY_NORMAL_ALIASES.concat(['非环保', '普通款', '普通', 'a款', '选a', '买a', 'a的', 'a有', 'a好', 'a是', 'a什么']);
+  var B_TARGET_MARKERS = MY_ECO_ALIASES.concat(['环保产品', '环保款', '可降解款', '绿色款', '环保', '可降解', 'b款', '选b', '买b', 'b的', 'b有', 'b好', 'b是', 'b什么']);
 
   /* ========== 全局状态 ========== */
   var sessionId = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
@@ -990,13 +990,13 @@ JS_TEMPLATE = """
 
 
 def build_normal_response(cat, copy):
-    """普通款输入 -> 「本店有两种X售卖：」+ 普通款/环保款外观价格 + 干预文案。"""
+    """普通款输入 -> 「本店有两种X售卖：」+ 非环保款/环保款外观价格 + 干预文案。"""
     return (
         '本店有两种%s售卖：\n\n'
-        'A（普通款）%s\n'
+        'A（非环保产品）%s\n'
         '%s\n'
         '价格：%s元\n\n'
-        'B（环保可降解款）%s\n'
+        'B（环保产品）%s\n'
         '%s\n'
         '价格：%s元\n\n'
         '%s' % (

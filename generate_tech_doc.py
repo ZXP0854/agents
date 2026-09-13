@@ -253,7 +253,8 @@ def build_doc():
     p(doc, '询问「能问什么」（帮助）：当被试问"我能问什么问题""可以问什么"等，Agent 会列出可询问的具体信息清单（优点/好处/缺点、用途/价格/材质/规格/效果、性价比/口碑/安全性/耐用性、环保意义/降解/购买渠道/适用人群/注意事项、对比/推荐，以及环保知识示例）。')
 
     heading(doc, '4.2 普通商品回复（输入本品类普通款）', 2)
-    p(doc, '回复格式：「本店有两种X售卖：」+ A（普通款）名称/外观/价格 + B（环保款）名称/外观/价格 + 干预文案。')
+    p(doc, '回复格式：「本店有两种X售卖：」+ A（非环保产品）名称/外观/价格 + B（环保产品）名称/外观/价格 + 干预文案。'
+           '（A/B 标注与实验指导语一致：指导语称被试结算商品为"非环保产品"，对应 A；B 为环保产品。）')
     for group_type, group_label in [('collaboration', '协作组'), ('non_collaboration', '非协作组')]:
         copy_dict = GA.COLLABORATION_COPY if group_type == 'collaboration' else GA.NON_COLLABORATION_COPY
         for cat in GA.CATEGORIES:
