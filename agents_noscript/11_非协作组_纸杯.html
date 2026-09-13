@@ -182,10 +182,36 @@ white-space: nowrap;
   var KB_COMPARE = "永辉优选一次性纸杯更便宜；恒鑫PLA生物可降解纸杯更环保、双层隔热。两者容量相近，差别在材质与环保属性上。";
   var KB_RECOMMEND = "如果您更看重环保与隔热，推荐选择B（恒鑫PLA生物可降解纸杯）；如果更看重价格，可以选择A（永辉优选一次性纸杯）。";
 
-  /* ========== 引导语（区别于核心操纵句，不在每次追问时重复） ========== */
-  var FOLLOWUP_CLOSING = (MY_GROUP === 'collaboration')
-    ? '欢迎随时向我询问这两款' + MY_MEASURE + '的优缺点、价格或推荐，我很乐意为您解答。'
-    : '欢迎随时向我询问这两款' + MY_MEASURE + '的优缺点、价格或推荐，我很乐意为您解答。';
+  /* ========== 追问收尾（核心操纵元素自然融入，避免生硬重复整句） ========== */
+  var CLOSING_BY_TYPE = {
+    collaboration: {
+      '优点': '它（们）的这些优点，正是我们共同选择环保产品、为环保做出贡献的理由。',
+      '好处': '这也让我们在为环保做出贡献的同时，收获更多。',
+      '缺点': '虽然有一些不足，但为环保计，它仍值得我们一起选择。',
+      '用途': '日常使用中，我们也能一起为环保尽一份力。',
+      '价格': '多付一点，是我们一起为环保尽的心意。',
+      '安全': '健康又环保，值得我们一起选择。',
+      '对比': '综合来看，加入我们一起选择环保款，就是为环保做出贡献。',
+      '推荐': '加入我们，一起为环保做出贡献。',
+      'eco': '这也正是我们共同守护环境的方式。'
+    },
+    non_collaboration: {
+      '优点': '这些优点，正是绿色消费的优选理由。',
+      '好处': '这也是您为绿色消费尽的一份力。',
+      '缺点': '虽然有一些不足，但为环保计，您仍可考虑它。',
+      '用途': '日常使用中，您也能为绿色消费尽一份力。',
+      '价格': '多付一点，是您为环保尽的心意。',
+      '安全': '健康又环保，值得您选择。',
+      '对比': '综合来看，请您选择绿色消费，环保款更值得考虑。',
+      '推荐': '请您选择绿色消费，环保款值得考虑。',
+      'eco': '这也正是您践行绿色消费的方式。'
+    }
+  };
+
+  function getClosing(type) {
+    var map = CLOSING_BY_TYPE[MY_GROUP === 'collaboration' ? 'collaboration' : 'non_collaboration'];
+    return map[type] || map['推荐'];
+  }
 
   /* ========== 固定话术（实验要求，不可改动） ========== */
   var WELCOME_MSG = '顾客您好！欢迎光临小林超市，我是本店的 AI 智能助手小林，请输入您的商品信息。';
@@ -317,26 +343,26 @@ white-space: nowrap;
 
   function answerQuestion(qt, input) {
     if (qt.type === '对比') {
-      return KB_COMPARE + '\n' + FOLLOWUP_CLOSING;
+      return KB_COMPARE + getClosing('对比');
     }
     if (qt.type === '推荐') {
-      return KB_RECOMMEND + '\n' + FOLLOWUP_CLOSING;
+      return KB_RECOMMEND + getClosing('推荐');
     }
     if (qt.type === 'eco') {
-      return 'B（' + MY_ECO_PRODUCT + '）的好处：' + KB_B['好处'] + '\n' + FOLLOWUP_CLOSING;
+      return 'B（' + MY_ECO_PRODUCT + '）的好处：' + KB_B['好处'] + getClosing('eco');
     }
 
     var label = LABEL_MAP[qt.type];
     var target = detectTarget(input);
     if (target === 'A') {
-      return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type] + '\n' + FOLLOWUP_CLOSING;
+      return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type] + getClosing(qt.type);
     }
     if (target === 'B') {
-      return 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type] + '\n' + FOLLOWUP_CLOSING;
+      return 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type] + getClosing(qt.type);
     }
     return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type]
-      + '\nB（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type]
-      + '\n' + FOLLOWUP_CLOSING;
+      + 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type]
+      + getClosing(qt.type);
   }
 
   /* ========== 数据回调 ========== */
