@@ -689,7 +689,7 @@ JS_TEMPLATE = """
 
   /* ========== 固定话术（实验要求，不可改动） ========== */
   var WELCOME_MSG = '顾客您好！欢迎光临小林超市，我是本店的 AI 智能助手小林，请输入您的商品信息。';
-  var ERROR_MSG = '抱歉，暂不支持该商品，请输入与' + MY_MEASURE + '有关的商品。';
+  var ERROR_MSG = '抱歉，暂不支持该商品，请输入本超市商品：A4 白纸、金属中性笔、透明胶带大卷、垃圾袋、软毛牙刷、一次性纸杯。';
   var ECO_PROMPT_MSG = '本次请输入普通版本商品，请重新输入对应普通商品名称。';
   var FALLBACK_QA_MSG = '关于这个问题我暂时没有更多信息。您可以向我询问这两款' + MY_MEASURE + '的：优点、缺点、好处、用途、价格、材质、规格、效果、性价比、口碑、环保意义、降解情况、购买渠道、适用人群、注意事项等。';
   var HELP_MSG = '您可以向我询问这两款' + MY_MEASURE + '的以下具体信息：\\n1. 优点、好处、缺点；\\n2. 用途、价格、材质、规格、效果；\\n3. 性价比、口碑、安全性、耐用性；\\n4. 环保意义、降解情况、购买渠道、适用人群、注意事项；\\n5. 两款商品的对比，或让我为您推荐。\\n您也可以了解环保知识，例如"PLA是什么""可降解是什么意思"等。';
@@ -955,14 +955,15 @@ JS_TEMPLATE = """
 
     // 阶段0：等待被试输入普通商品 -> 展示核心操纵文案（干预文案）
     if (flowStage === 0) {
-      if (matchAny(MY_NORMAL_ALIASES, text)) {
+      // 环保款优先匹配（如「竹牙刷」不能先被普通款别名「牙刷」命中）
+      if (matchAny(MY_ECO_ALIASES, text)) {
+        reply = ECO_PROMPT_MSG;
+        replyType = 'eco_product_prompt';
+      } else if (matchAny(MY_NORMAL_ALIASES, text)) {
         reply = MY_COPY;
         replyType = 'product_copy';
         nextStage = 1;
         setPlaceholder(1);
-      } else if (matchAny(MY_ECO_ALIASES, text)) {
-        reply = ECO_PROMPT_MSG;
-        replyType = 'eco_product_prompt';
       } else {
         reply = ERROR_MSG;
         replyType = 'error_response';
@@ -1128,11 +1129,16 @@ def main():
         ('non_collaboration', '非协作组')
     ]
 
+    # 商品顺序（与《实验参考文本》一致）
+    product_order = ['A4白纸', '一次性纸杯', '金属中性笔', '透明胶带大卷', '垃圾袋', '软毛牙刷']
+    cat_by_key = {cat['copy_key']: cat for cat in CATEGORIES}
+
     count = 0
     for group_type, group_label in groups:
-        for cat in CATEGORIES:
+        for key in product_order:
+            cat = cat_by_key[key]
             count += 1
-            filename = '%02d_%s_%s.html' % (count, group_label, cat['category'])
+            filename = '%02d_%s_%s.html' % (count, group_label, cat['copy_key'])
             filepath = os.path.join(OUT_DIR, filename)
 
             html = generate_html(group_type, cat)
