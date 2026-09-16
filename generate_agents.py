@@ -75,6 +75,7 @@ CATEGORIES = [
         },
         'compare': '金属中性笔更便宜、更结实；咖啡渣环保中性笔更环保、更有质感。两者书写体验基本一致，差别主要在外观材质与环保属性上。',
         'recommend': '如果您更看重环保与可持续，推荐选择B（咖啡渣环保中性笔）；如果更看重价格与耐用，可以选择A（金属中性笔）。',
+        'advantage': '环保款咖啡渣环保中性笔采用废弃咖啡渣回收制作的可降解外壳，实现废物利用、减少塑料污染；普通款金属中性笔为不锈钢材质，生产能耗较高、难以自然降解。两者书写体验基本一致，差别主要在外观材质与环保属性上。选择环保款，既满足日常书写，又为环保尽一份力。',
     },
     {
         'category': '包装胶带',
@@ -108,6 +109,7 @@ CATEGORIES = [
         },
         'compare': '得力透明封箱胶带更便宜、供应多；可降解封箱胶带更环保。两者粘性差别不大，主要差别在环保属性与价格上。',
         'recommend': '如果您更看重环保，推荐选择B（可降解封箱胶带）；如果更看重价格与供应便利，可以选择A（得力透明封箱胶带）。',
+        'advantage': '环保款可降解封箱胶带采用植物基可降解材质，使用后可自然分解、不产生长期塑料污染，粘性与普通款相当；普通款透明封箱胶带为传统塑料材质，降解需数百年。两者打包效果差别不大，差别主要在环保属性上。',
     },
     {
         'category': '垃圾袋',
@@ -141,6 +143,7 @@ CATEGORIES = [
         },
         'compare': '飞达三和普通垃圾袋更便宜、更防水；玉米淀粉全降解垃圾袋更环保。两者承重接近，主要差别在降解性与价格上。',
         'recommend': '如果您更看重环保，推荐选择B（玉米淀粉全降解垃圾袋）；如果更看重价格与装湿垃圾，可以选择A（飞达三和普通垃圾袋）。',
+        'advantage': '环保款玉米淀粉全降解垃圾袋以玉米淀粉等全生物降解材质制成，降解后分解为水、二氧化碳和有机肥，不污染环境；普通款垃圾袋为传统塑料，降解需数百年。两者承重接近，差别主要在降解性与环保属性上。',
     },
     {
         'category': '牙刷',
@@ -174,6 +177,7 @@ CATEGORIES = [
         },
         'compare': '普通软毛牙刷更便宜、颜色多；竹制环保牙刷更环保、天然抗菌。两者清洁效果接近，差别在材质与环保属性上。',
         'recommend': '如果您更看重环保，推荐选择B（竹制环保牙刷）；如果更看重价格与颜色，可以选择A（普通软毛牙刷）。',
+        'advantage': '环保款竹制环保牙刷刷柄采用天然竹子，天然抗菌、可再生，废弃后可自然降解；普通款软毛牙刷为塑料手柄，降解需数百年。两者清洁效果接近，差别主要在材质与环保属性上。',
     },
     {
         'category': '纸杯',
@@ -207,6 +211,7 @@ CATEGORIES = [
         },
         'compare': '永辉优选一次性纸杯更便宜；恒鑫PLA生物可降解纸杯更环保、双层隔热。两者容量相近，差别在材质与环保属性上。',
         'recommend': '如果您更看重环保与隔热，推荐选择B（恒鑫PLA生物可降解纸杯）；如果更看重价格，可以选择A（永辉优选一次性纸杯）。',
+        'advantage': '环保款恒鑫PLA生物可降解纸杯采用PLA淋膜可降解材质、双层隔热，可自然降解、不含双酚A；普通款一次性纸杯内壁为PE淋膜，降解较慢。两者容量相近，差别主要在材质与环保属性上。',
     },
     {
         'category': '纸张',
@@ -240,6 +245,7 @@ CATEGORIES = [
         },
         'compare': '超群A4白纸更白、更便宜；80克A4甘蔗纸更环保、更健康。两者书写打印效果基本一致，差别在颜色与环保属性上。',
         'recommend': '如果您更看重环保与健康，推荐选择B（80克A4甘蔗纸）；如果更看重白度与价格，可以选择A（超群A4白纸）。',
+        'advantage': '环保款80克A4甘蔗纸以甘蔗纤维为原料、无荧光增白剂，减少林木砍伐、碳排放更低；普通款超群A4白纸为传统木浆纸，漂白生产有一定环境负担。两者书写打印效果基本一致，差别主要在颜色与环保属性上。',
     },
 ]
 
@@ -627,6 +633,9 @@ JS_TEMPLATE = """
   var MY_ECO_ALIASES = __ECO_ALIASES__;
   var MY_COPY = __COPY__;
   var PRODUCT_INFO = __PRODUCT_INFO__;
+  var ADVANTAGE = __ADVANTAGE__;
+  var PRICE_INFO = __PRICE_INFO__;
+  var APPEARANCE_INFO = __APPEARANCE_INFO__;
 
   /* ========== A/B 知识库 ========== */
   var KB_A = __KB_A__;
@@ -689,27 +698,24 @@ JS_TEMPLATE = """
 
   /* ========== 固定话术（实验要求，不可改动） ========== */
   var WELCOME_MSG = '顾客您好！欢迎光临小林超市，我是本店的 AI 智能助手小林，请输入您的商品信息。';
-  var ERROR_MSG = '抱歉，暂不支持该商品，请输入本超市商品：A4 白纸、金属中性笔、透明胶带大卷、垃圾袋、软毛牙刷、一次性纸杯。';
-  var ECO_PROMPT_MSG = '本次请输入普通版本商品，请重新输入对应普通商品名称。';
-  var FALLBACK_QA_MSG = '关于这个问题我暂时没有更多信息。您可以向我询问这两款' + MY_MEASURE + '的：优点、缺点、好处、用途、价格、材质、规格、效果、性价比、口碑、环保意义、降解情况、购买渠道、适用人群、注意事项等。';
-  var HELP_MSG = '您可以向我询问这两款' + MY_MEASURE + '的以下具体信息：\\n1. 优点、好处、缺点；\\n2. 用途、价格、材质、规格、效果；\\n3. 性价比、口碑、安全性、耐用性；\\n4. 环保意义、降解情况、购买渠道、适用人群、注意事项；\\n5. 两款商品的对比，或让我为您推荐。\\n您也可以了解环保知识，例如"PLA是什么""可降解是什么意思"等。';
+  var ERROR_MSG = '抱歉，未检索到当前商品，请输入正确的商品。';
+  var ECO_PROMPT_MSG = '抱歉，未检索到当前商品，请输入正确的商品。';
+  var FALLBACK_QA_MSG = '关于这个问题我暂时没有更多信息。您可以向我询问环保类型商品的优势信息，或商品的优缺点、价格、材质、使用等具体信息。';
+  var HELP_MSG = '您可以向我询问环保类型商品的优势信息，或商品的以下具体信息：\\n1. 优点、好处、缺点；\\n2. 用途、价格、材质、规格、效果；\\n3. 性价比、口碑、安全性、耐用性；\\n4. 环保意义、降解情况、购买渠道、适用人群、注意事项；\\n5. 两款商品的对比，或让我为您推荐。\\n您也可以了解环保知识，例如"PLA是什么""可降解是什么意思"等。';
 
-  /* ========== 输入框灰字（提示语，随流程三阶段切换） ========== */
+  /* ========== 输入框灰字（提示语，随流程切换） ========== */
   var PLACEHOLDER_INITIAL = '请输入产品名称';
-  var PLACEHOLDER_ASK_PRODUCT = '询问本店可购买的商品';
-  var PLACEHOLDER_ACTIVE = '您现在可以询问两种商品的具体信息';
+  var PLACEHOLDER_ACTIVE = '您可以询问环保类型商品的优势信息';
 
   function setPlaceholder(state) {
-    if (state === 1) {
-      userInput.placeholder = PLACEHOLDER_ASK_PRODUCT;
-    } else if (state >= 2) {
+    if (state >= 1) {
       userInput.placeholder = PLACEHOLDER_ACTIVE;
     } else {
       userInput.placeholder = PLACEHOLDER_INITIAL;
     }
   }
 
-  /* ========== 询问商品意图检测（阶段2） ========== */
+  /* ========== 询问商品意图检测 ========== */
   var ASK_PRODUCT_KEYS = ['有什么商品', '有哪些商品', '什么商品', '哪些商品', '有什么东西', '有哪些东西', '有什么', '有哪些', '卖什么', '卖哪些', '卖什么东西', '卖的东西', '售卖', '出售', '销售', '可购买', '能购买', '可以购买', '可买', '能买', '可以买', '能买到', '买到什么', '买什么', '买哪些', '本店有什么', '本店有哪些', '本店卖', '本店能', '本店可', '本店出售', '本店销售', '商品有哪些', '商品有什么', '商品'];
 
   function isAskProduct(input) {
@@ -722,12 +728,13 @@ JS_TEMPLATE = """
 
   /* ========== 追问类型（12 个 agent 风格统一，具体类型优先） ========== */
   var QUESTION_TYPES = [
+    { type: '优势', target: false, keys: ['优势', '优势信息', '有什么优势', '有哪些优势', '优势是什么', '好在哪', '好处在哪', '凭什么', '为什么选环保', '环保款有什么好', '环保产品有什么好', '环保有什么优势', '亮点在哪'] },
     { type: '帮助', target: false, keys: ['能问什么', '可以问什么', '能问啥', '可以问啥', '问什么', '问些什么', '问点啥', '问哪些', '能问哪些', '可以问哪些', '问哪些问题', '能问的问题', '可以问的问题', '怎么问', '能问吗', '可以问吗', '能咨询什么', '可以咨询什么', '请问能问', '能了解什么', '可以了解什么'] },
     { type: '推荐', target: false, keys: ['推荐', '建议', '买哪个', '选哪个', '应该买', '值得买', '买什么', '怎么选', '买哪款', '选哪款'] },
     { type: '对比', target: false, keys: ['对比', '区别', '比较', '相比', 'vs', '哪个好', '有什么不同', '差别', '不一样', '哪个更好', '不同'] },
     { type: '价格', target: true,  keys: ['价格', '多少钱', '贵', '便宜', '成本', '花费', '划算', '价位'] },
     { type: '材质', target: true,  keys: ['材质', '材料', '成分', '什么做的', '原料'] },
-    { type: '规格', target: true,  keys: ['规格', '尺寸', '容量', '多大', '多少毫升', '多少张', '多少只', '型号'] },
+    { type: '规格', target: true,  keys: ['规格', '尺寸', '容量', '多大', '多少毫升', '多少张', '多少只', '型号', '外观', '长什么样', '长相'] },
     { type: '效果', target: true,  keys: ['效果', '好不好用', '好用吗', '管用', '好用'] },
     { type: '性价比', target: true,  keys: ['性价比', '值不值', '值吗', '值这个价', '划得来'] },
     { type: '口碑', target: true,  keys: ['口碑', '评价', '销量', '受欢迎', '卖得好', '人气', '好评'] },
@@ -865,6 +872,8 @@ JS_TEMPLATE = """
     }
 
     // 4) 含疑问语气但未命中任何词库 -> 标记为未知追问（走兜底引导）
+    // 但「本店有什么商品」等询问商品的语句不视为未知追问，交由询问商品分支处理
+    if (isAskProduct(input)) return null;
     var askMarkers = ['?', '？', '吗', '呢', '什么', '怎么', '如何', '多少', '哪个'];
     for (var n = 0; n < askMarkers.length; n++) {
       if (lower.indexOf(askMarkers[n].toLowerCase()) !== -1) return { type: 'unknown' };
@@ -882,6 +891,9 @@ JS_TEMPLATE = """
     if (qt.type === '帮助') {
       return HELP_MSG;
     }
+    if (qt.type === '优势') {
+      return ADVANTAGE + getClosing('对比');
+    }
     if (qt.type === '对比') {
       return KB_COMPARE + getClosing('对比');
     }
@@ -898,16 +910,24 @@ JS_TEMPLATE = """
       return ECO_CONCEPTS['绿色消费'] + getClosing('eco');
     }
 
+    // 价格/外观单独回答（不用 A/B 编号）
+    if (qt.type === '价格') {
+      return PRICE_INFO + getClosing('价格');
+    }
+    if (qt.type === '规格') {
+      return APPEARANCE_INFO + getClosing('规格');
+    }
+
     var label = LABEL_MAP[qt.type];
     var target = detectTarget(input);
     if (target === 'A') {
-      return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type] + getClosing(qt.type);
+      return '普通款' + MY_NORMAL_PRODUCT + '的' + label + '：' + KB_A[qt.type] + getClosing(qt.type);
     }
     if (target === 'B') {
-      return 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type] + getClosing(qt.type);
+      return '环保款' + MY_ECO_PRODUCT + '的' + label + '：' + KB_B[qt.type] + getClosing(qt.type);
     }
-    return 'A（' + MY_NORMAL_PRODUCT + '）的' + label + '：' + KB_A[qt.type]
-      + 'B（' + MY_ECO_PRODUCT + '）的' + label + '：' + KB_B[qt.type]
+    return '普通款' + MY_NORMAL_PRODUCT + '的' + label + '：' + KB_A[qt.type]
+      + '环保款' + MY_ECO_PRODUCT + '的' + label + '：' + KB_B[qt.type]
       + getClosing(qt.type);
   }
 
@@ -953,7 +973,7 @@ JS_TEMPLATE = """
     var replyType;
     var nextStage = flowStage;
 
-    // 阶段0：等待被试输入普通商品 -> 展示核心操纵文案（干预文案）
+    // 第一轮：等待被试输入普通商品 -> 展示核心操纵文案（干预文案）
     if (flowStage === 0) {
       // 环保款优先匹配（如「竹牙刷」不能先被普通款别名「牙刷」命中）
       if (matchAny(MY_ECO_ALIASES, text)) {
@@ -969,20 +989,7 @@ JS_TEMPLATE = """
         replyType = 'error_response';
       }
     }
-    // 阶段1：已展示干预文案，引导询问本店商品 -> 展示 A/B 外观+价格
-    else if (flowStage === 1) {
-      if (isAskProduct(text)) {
-        reply = PRODUCT_INFO;
-        replyType = 'product_info';
-        nextStage = 2;
-        setPlaceholder(2);
-      } else {
-        // 尚未询问商品，继续引导
-        reply = '您还没有询问本店可购买的商品哦，请输入"本店有什么商品"或商品名称，我来为您介绍。';
-        replyType = 'guidance';
-      }
-    }
-    // 阶段2：已展示商品信息，进入自由问答
+    // 第二轮起：自由问答（外观/价格已并入本轮，不再单独设第二轮）
     else {
       var qt = detectQuestion(text);
       if (qt) {
@@ -994,22 +1001,22 @@ JS_TEMPLATE = """
           replyType = 'qa_response';
         }
       }
+      // 询问商品外观价格 -> 展示 A/B 外观+价格
+      else if (isAskProduct(text)) {
+        reply = PRODUCT_INFO;
+        replyType = 'product_info';
+      }
       // 被试再次输入环保款商品 -> 提示改输普通版本
       else if (matchAny(MY_ECO_ALIASES, text)) {
         reply = ECO_PROMPT_MSG;
         replyType = 'eco_product_prompt';
-      }
-      // 被试再次询问商品信息 -> 重新展示 A/B 外观+价格
-      else if (isAskProduct(text)) {
-        reply = PRODUCT_INFO;
-        replyType = 'product_info';
       }
       // 再次输入普通商品 -> 重新展示干预文案
       else if (matchAny(MY_NORMAL_ALIASES, text)) {
         reply = MY_COPY;
         replyType = 'product_copy';
       }
-      // 其余输入 -> 按品类固定报错
+      // 其余输入 -> 固定报错
       else {
         reply = ERROR_MSG;
         replyType = 'error_response';
@@ -1049,7 +1056,7 @@ JS_TEMPLATE = """
 
 
 def build_product_info(cat):
-    """阶段2：展示 A/B 两款商品的外观与价格信息。"""
+    """第二轮（询问商品）展示 A/B 两款商品的外观与价格信息。"""
     return (
         '本店有两种%s售卖：\n\n'
         'A（非环保产品）%s\n'
@@ -1065,11 +1072,34 @@ def build_product_info(cat):
     )
 
 
+def build_price_info(cat):
+    """第三轮回答「价格」：两款商品价格对比，不罗列编号。"""
+    return (
+        '普通款%s价格为%s元；环保款%s价格为%s元。'
+        '两者价格略有差异，环保款因采用环保材料，价格略高一些。' % (
+            cat['normal_name'], cat['normal_price'],
+            cat['eco_name'], cat['eco_price'],
+        )
+    )
+
+
+def build_appearance_info(cat):
+    """第三轮回答「外观/规格」：两款商品外观描述，不罗列编号。"""
+    return (
+        '普通款%s：%s。环保款%s：%s。' % (
+            cat['normal_name'], cat['normal_appearance'],
+            cat['eco_name'], cat['eco_appearance'],
+        )
+    )
+
+
 def generate_html(group_type, cat):
     group_label = 'collaboration' if group_type == 'collaboration' else 'non_collaboration'
     copy_dict = COLLABORATION_COPY if group_type == 'collaboration' else NON_COLLABORATION_COPY
     copy = copy_dict[cat['copy_key']]
     product_info = build_product_info(cat)
+    price_info = build_price_info(cat)
+    appearance_info = build_appearance_info(cat)
 
     # 合并基础知识库（7 项）与扩展知识库（10 项）
     extra = EXTRA_KB[cat['category']]
@@ -1088,6 +1118,9 @@ def generate_html(group_type, cat):
           .replace('__ECO_ALIASES__', json.dumps(cat['eco_aliases'], ensure_ascii=False))
           .replace('__COPY__', json.dumps(copy, ensure_ascii=False))
           .replace('__PRODUCT_INFO__', json.dumps(product_info, ensure_ascii=False))
+          .replace('__ADVANTAGE__', json.dumps(cat['advantage'], ensure_ascii=False))
+          .replace('__PRICE_INFO__', json.dumps(price_info, ensure_ascii=False))
+          .replace('__APPEARANCE_INFO__', json.dumps(appearance_info, ensure_ascii=False))
           .replace('__ECO_CONCEPTS__', json.dumps(ECO_CONCEPTS, ensure_ascii=False))
           .replace('__ECO_CONCEPT_KEYWORDS__', json.dumps(ECO_CONCEPT_KEYWORDS, ensure_ascii=False))
           .replace('__KB_A__', json.dumps(kb_a, ensure_ascii=False))
